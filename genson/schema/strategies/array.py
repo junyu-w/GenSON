@@ -1,3 +1,4 @@
+from json_stream.base import StreamingJSONList
 from .base import SchemaStrategy
 
 
@@ -44,6 +45,15 @@ class List(BaseArray):
 
     def items_to_schema(self):
         return self._items.to_schema()
+
+
+class StreamingList(List):
+    """
+    strategy for streaming list
+    """
+    @staticmethod
+    def match_object(obj):
+        return isinstance(obj, StreamingJSONList)
 
 
 class Tuple(BaseArray):

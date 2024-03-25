@@ -9,8 +9,8 @@ from .scalar import (
     Number,
     String
 )
-from .array import List, Tuple
-from .object import Object
+from .array import List, Tuple, StreamingList
+from .object import Object, StreamingObject
 
 BASIC_SCHEMA_STRATEGIES = (
     Null,
@@ -19,7 +19,9 @@ BASIC_SCHEMA_STRATEGIES = (
     String,
     List,
     Tuple,
-    Object
+    Object,
+    StreamingObject,
+    StreamingList,
 )
 
 __all__ = (

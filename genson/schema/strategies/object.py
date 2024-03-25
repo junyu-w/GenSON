@@ -1,5 +1,6 @@
 from collections import defaultdict
 from re import search
+from json_stream.base import StreamingJSONObject
 from .base import SchemaStrategy
 
 
@@ -95,3 +96,12 @@ class Object(SchemaStrategy):
         for prop, schema_node in properties.items():
             schema_properties[prop] = schema_node.to_schema()
         return schema_properties
+
+class StreamingObject(Object):
+    """
+    streaming object schema strategy
+    """
+
+    @staticmethod
+    def match_object(obj):
+        return isinstance(obj, StreamingJSONObject)

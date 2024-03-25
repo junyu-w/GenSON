@@ -2,6 +2,7 @@ import argparse
 import sys
 import re
 import json
+import json_stream
 from . import SchemaBuilder, __version__
 
 
@@ -79,6 +80,13 @@ class CLI:
             result.""".format(default=SchemaBuilder.DEFAULT_URI,
                               null=SchemaBuilder.NULL_URI))
         self.parser.add_argument(
+            '-str', '--stream', dest='is_stream', action='store_true',
+            default=False,
+            help="""Whether to read the input object as a stream of JSON objects, useful
+            when the input is a large file with many JSON objects and you don't want to
+            load the entire file into memory. If this option is omitted, the entire file
+            will be read at once by default.""")
+        self.parser.add_argument(
             'object', nargs=argparse.REMAINDER, type=file_type,
             help="""Files containing JSON objects (defaults to stdin if no
             arguments are passed).""")
@@ -113,12 +121,17 @@ class CLI:
             self.args.delimiter = ' '
 
     def _call_with_json_from_fp(self, method, fp):
-        for json_string in self._get_json_strings(fp.read().strip()):
-            try:
-                json_obj = json.loads(json_string)
-            except json.JSONDecodeError as err:
-                self.fail('invalid JSON in {}: {}'.format(fp.name, err))
+        if self.args.is_stream:
+            json_obj = json_stream.load(fp, persistent=False)
             method(json_obj)
+
+        else:
+            for json_string in self._get_json_strings(fp.read().strip()):
+                try:
+                    json_obj = json.loads(json_string)
+                except json.JSONDecodeError as err:
+                    self.fail('invalid JSON in {}: {}'.format(fp.name, err))
+                method(json_obj)
 
     def _get_json_strings(self, raw_text):
         if self.args.delimiter is None or self.args.delimiter == '':
